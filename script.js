@@ -185,11 +185,13 @@
     const menu = document.querySelector('[data-nav-menu]');
     if (!toggle || !menu) return;
 
+    const label = toggle.querySelector('.site-nav__toggle-label');
     let releaseFocusTrap = null;
 
     function openMenu() {
       menu.setAttribute('data-open', 'true');
       toggle.setAttribute('aria-expanded', 'true');
+      if (label) label.textContent = 'Kapat';
       document.body.style.overflow = 'hidden';
       releaseFocusTrap = trapFocus(menu);
       const firstLink = menu.querySelector('.site-nav__link');
@@ -199,6 +201,7 @@
     function closeMenu({ restoreFocus = true } = {}) {
       menu.setAttribute('data-open', 'false');
       toggle.setAttribute('aria-expanded', 'false');
+      if (label) label.textContent = 'Menü';
       document.body.style.overflow = '';
       if (releaseFocusTrap) {
         releaseFocusTrap();
@@ -866,12 +869,18 @@
       entry.img.setAttribute('role', 'button');
       entry.img.setAttribute('aria-label', `Görseli büyüt: ${entry.img.alt || 'galeri fotoğrafı'}`);
 
-      const trigger = () => openLightbox(entry.groupName, index);
+      const trigger = (e) => {
+        // Smile-gallery images sit inside a before/after card whose parent
+        // also listens for clicks to reposition the compare handle —
+        // without this, opening the lightbox would also jump the slider.
+        e.stopPropagation();
+        openLightbox(entry.groupName, index);
+      };
       entry.img.addEventListener('click', trigger);
       entry.img.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          trigger();
+          trigger(e);
         }
       });
     });

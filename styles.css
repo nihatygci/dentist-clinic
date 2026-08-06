@@ -1,6 +1,33 @@
 /* ==========================================================================
-   AURA DENTAL — Design System & Stylesheet (v2 — Awwwards refinement pass)
+   AURA DENTAL — Design System & Stylesheet (v3 — mobile bugfix pass)
    Editorial / Scandinavian / Luxury Healthcare
+
+   Changelog vs. v2 (mobile-specific fixes — found by re-reading every
+   file end to end, not just spot-checking):
+   - CRITICAL: the mobile nav menu lives inside <header>, which has its
+     own position:fixed + z-index stacking context. Its z-index was
+     therefore trapped *inside* that context and could never actually
+     out-rank the sticky mobile CTA bar / back-to-top button (both
+     appended directly to <body>) — opening the menu made those float
+     on top of it instead of being covered. Fixed by raising --z-nav
+     above --z-mobile-cta.
+   - CRITICAL: for the same reason, the hamburger/close toggle button
+     itself (non-positioned) was painted *underneath* the full-screen
+     menu once open — meaning there was no way to tap it closed again.
+     Now explicitly stacked above the menu.
+   - The before/after compare handle's real interactive hit-area was
+     only 2px wide (the visible 40px circle was decorative and didn't
+     extend the touch target) — essentially unusable on a phone. Now a
+     proper 44px touch target, with touch-action: none so dragging it
+     doesn't fight the page's own scroll gesture.
+   - Same touch/scroll conflict fixed on the testimonial slider track
+     (touch-action: pan-y — vertical scroll still works, horizontal
+     swipe goes to JS).
+   - Mobile nav menu could overflow off-screen on short viewports with
+     no way to scroll to the lower links; also worked around a flexbox
+     "centered content clips on overflow" quirk.
+   - Toggle button touch target enlarged to ~44px (was smaller than the
+     icon + label alone).
 
    Changelog vs. v1 (what changed and why):
    - Real webfonts (Fraunces + Manrope) replace the unloaded Canela/Söhne
@@ -9,16 +36,13 @@
    - Mobile nav toggle animates hamburger → X.
    - Testimonials track is flex/overflow-hidden by default (no more
      grid → flex layout jump before JS runs).
-   - New signature motif: a thin "smile-arc" scroll indicator + quiet
-     blueprint registration marks in the hero — one considered, on-brand
-     flourish instead of scattered decoration.
    - Card system reworked: ghost index numerals, unified asymmetric-radius
      language on media containers, deeper/warmer hover states.
    - Soft gradient section seams instead of hard color cuts.
    - Contrast pass on muted text; stronger focus states.
    - content-visibility for offscreen sections (render performance).
-   - All JS-injected UI (cursor, back-to-top, lightbox, mobile CTA, ripple,
-     testimonial controls, form errors) now styled here as real components
+   - All JS-injected UI (back-to-top, lightbox, mobile CTA, ripple,
+     testimonial controls, form errors) styled here as real components
      instead of ad-hoc inline styles — cleaner separation of concerns.
    ========================================================================== */
 
@@ -135,8 +159,15 @@
   --duration-base: 420ms;
   --duration-slow: 720ms;
 
-  /* ---- Z-index scale ---- */
-  --z-nav: 100;
+  /* ---- Z-index scale ----
+     The mobile nav menu lives inside <header>, and .site-header has its
+     own position:fixed + z-index (i.e. its own stacking context) — so
+     the menu's z-index only ever competes with its own siblings inside
+     that context, never with elements outside it. --z-nav must sit
+     above --z-mobile-cta so that when the menu opens full-screen, it
+     correctly covers the sticky CTA bar and back-to-top button (both
+     appended directly to <body>) instead of rendering underneath them. */
+  --z-nav: 400;
   --z-mobile-cta: 300;
   --z-overlay: 500;
 }
@@ -1094,22 +1125,41 @@ section {
   clip-path: inset(0 0 0 50%);
 }
 
+/* The interactive element itself is a full 44px touch target (matching
+   standard minimum touch-target guidance) even though it only *looks*
+   like a thin line — the previous 2px-wide hit area made this nearly
+   impossible to grab on a phone. The thin line and circular grip are
+   now purely visual, drawn with pseudo-elements inside the wider box. */
 .before-after-card__slider {
   position: absolute;
   inset-block: 0;
   inset-inline-start: 50%;
-  inline-size: 2px;
-  background: var(--color-porcelain);
+  inline-size: 44px;
+  margin-inline-start: -22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: ew-resize;
+  /* Prevents the browser's default touch scrolling from fighting the
+     drag gesture — without this, dragging the handle on a touchscreen
+     also tries to scroll the page, making it feel broken. */
+  touch-action: none;
   transition: inset-inline-start var(--duration-fast) var(--ease-out);
 }
 
 .before-after-card__slider::before {
   content: "";
   position: absolute;
-  inset-block-start: 50%;
+  inset-block: 0;
   inset-inline-start: 50%;
-  transform: translate(-50%, -50%);
+  inline-size: 2px;
+  transform: translateX(-50%);
+  background: var(--color-porcelain);
+}
+
+.before-after-card__slider::after {
+  content: "";
+  position: relative;
   inline-size: 40px;
   block-size: 40px;
   border-radius: var(--radius-full);
@@ -1121,7 +1171,7 @@ section {
   box-shadow: none;
 }
 
-.before-after-card__slider:focus-visible::before {
+.before-after-card__slider:focus-visible::after {
   box-shadow: var(--shadow-focus);
 }
 
@@ -1309,6 +1359,10 @@ section {
 .testimonials__track {
   display: flex;
   will-change: transform;
+  /* Allow the browser's normal vertical scroll to pass through untouched,
+     but hand horizontal drags to JS instead of letting touch-scrolling
+     fight the swipe gesture. */
+  touch-action: pan-y;
 }
 
 .testimonial-card {
@@ -1902,10 +1956,19 @@ select.appointment-form__input {
 /* ---- Tablet ---- */
 @media (max-width: 960px) {
 
+  /* Must render above the full-screen menu (z-index: var(--z-overlay))
+     once it's open — otherwise the menu overlay paints over this
+     (non-positioned) button and the close tap has nothing to hit. Also
+     padded out to a proper ~44px touch target; the icon+label alone are
+     noticeably smaller than that. */
   .site-nav__toggle {
+    position: relative;
+    z-index: calc(var(--z-overlay) + 1);
     display: inline-flex;
     align-items: center;
     gap: var(--space-2xs);
+    padding: var(--space-2xs);
+    margin: calc(var(--space-2xs) * -1);
   }
 
   .site-nav__toggle-icon {
@@ -1942,12 +2005,15 @@ select.appointment-form__input {
     position: fixed;
     inset: 0;
     z-index: var(--z-overlay);
+    display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
     gap: var(--space-md);
-    padding: var(--container-padding);
+    padding: calc(var(--container-padding) + 3.5rem) var(--container-padding) var(--container-padding);
     background-color: var(--color-porcelain);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     transform: translateX(100%);
     transition: transform var(--duration-base) var(--ease-in-out);
   }
