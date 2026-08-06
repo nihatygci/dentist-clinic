@@ -1,0 +1,2275 @@
+/* ==========================================================================
+   AURA DENTAL — Design System & Stylesheet (v2 — Awwwards refinement pass)
+   Editorial / Scandinavian / Luxury Healthcare
+
+   Changelog vs. v1 (what changed and why):
+   - Real webfonts (Fraunces + Manrope) replace the unloaded Canela/Söhne
+     fallback stack — typography now actually reads as premium editorial.
+   - aria-current nav state is now visually styled (was a functional bug).
+   - Mobile nav toggle animates hamburger → X.
+   - Testimonials track is flex/overflow-hidden by default (no more
+     grid → flex layout jump before JS runs).
+   - New signature motif: a thin "smile-arc" scroll indicator + quiet
+     blueprint registration marks in the hero — one considered, on-brand
+     flourish instead of scattered decoration.
+   - Card system reworked: ghost index numerals, unified asymmetric-radius
+     language on media containers, deeper/warmer hover states.
+   - Soft gradient section seams instead of hard color cuts.
+   - Contrast pass on muted text; stronger focus states.
+   - content-visibility for offscreen sections (render performance).
+   - All JS-injected UI (cursor, back-to-top, lightbox, mobile CTA, ripple,
+     testimonial controls, form errors) now styled here as real components
+     instead of ad-hoc inline styles — cleaner separation of concerns.
+   ========================================================================== */
+
+/* ==========================================================================
+   1. DESIGN TOKENS
+   ========================================================================== */
+
+:root {
+
+  /* ---- Color: surfaces ----
+     Shifted from a warm sage/emerald "spa" palette to a cool clinical
+     teal-blue system — blue reads trust/precision/medical across the
+     dental category, while staying bright, minimal and premium. Variable
+     names are kept stable so every var() reference below updates
+     automatically; only the hex values changed. */
+  --color-porcelain:        #FAFBFC;
+  --color-sand:              #EAF2F4;
+  --color-ink:                #14232B;
+  --color-stone:              #52636B;   /* cool grey, AA contrast on porcelain */
+  --color-sage:                #4C93A6;
+  --color-sage-soft:           #E3F0F3;
+  --color-gold:                  #C9A876;
+  --color-emerald:                #0E4B5C;
+  --color-emerald-deep:            #0A2E38;
+  --color-ash:                      #DCE8EA;
+  --color-mint:                      #8FCBD9;
+  --color-white:                      #FFFFFF;
+  --color-terracotta:                 #B3462C; /* error / alert accent */
+
+  /* semantic aliases */
+  --color-bg:               var(--color-porcelain);
+  --color-bg-alt:            var(--color-sand);
+  --color-text:              var(--color-ink);
+  --color-text-muted:        var(--color-stone);
+  --color-border:            var(--color-ash);
+  --color-accent:            var(--color-sage);
+  --color-accent-strong:     var(--color-emerald);
+  --color-accent-gold:       var(--color-gold);
+
+  /* shadow tint (cool, clinical-blue-leaning) */
+  --shadow-color: 205deg 12% 40%;
+
+  /* ---- Typography ---- */
+  --font-display: "Fraunces", "Iowan Old Style", "Georgia", serif;
+  --font-body: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-label: var(--font-body);
+
+  /* fluid type scale — clamp(min, preferred, max) */
+  --text-xs:    clamp(0.75rem, 0.72rem + 0.12vw, 0.8125rem);
+  --text-sm:    clamp(0.875rem, 0.84rem + 0.16vw, 0.9375rem);
+  --text-base:  clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --text-md:    clamp(1.125rem, 1.06rem + 0.3vw, 1.3125rem);
+  --text-lg:    clamp(1.375rem, 1.24rem + 0.6vw, 1.75rem);
+  --text-xl:    clamp(1.75rem, 1.5rem + 1.1vw, 2.5rem);
+  --text-2xl:   clamp(2.25rem, 1.8rem + 2vw, 3.5rem);
+  --text-3xl:   clamp(2.75rem, 2.1rem + 2.9vw, 4.75rem);
+  --text-4xl:   clamp(3.25rem, 2.2rem + 4.6vw, 6.75rem);
+  --text-hero:  clamp(3rem, 1.6rem + 6.2vw, 8.25rem);
+
+  --leading-tight:  1.03;
+  --leading-snug:   1.18;
+  --leading-body:   1.65;
+  --leading-loose:  1.8;
+
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.08em;
+  --tracking-wider:  0.18em;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ---- Fluid Spacing (8pt-derived, scaled for luxury whitespace) ---- */
+  --space-3xs: clamp(0.25rem, 0.23rem + 0.1vw, 0.375rem);
+  --space-2xs: clamp(0.5rem, 0.46rem + 0.2vw, 0.625rem);
+  --space-xs:  clamp(0.75rem, 0.68rem + 0.35vw, 1rem);
+  --space-sm:  clamp(1rem, 0.9rem + 0.5vw, 1.5rem);
+  --space-md:  clamp(1.75rem, 1.5rem + 1.2vw, 2.5rem);
+  --space-lg:  clamp(2.75rem, 2.1rem + 3vw, 4.5rem);
+  --space-xl:  clamp(4rem, 2.6rem + 6.5vw, 8.5rem);
+  --space-2xl: clamp(5.5rem, 3rem + 11vw, 13rem);
+  --space-3xl: clamp(6.5rem, 3rem + 15vw, 18rem);
+
+  /* ---- Layout ---- */
+  --container-max: 1360px;
+  --container-narrow: 860px;
+  --container-padding: clamp(1.25rem, 0.8rem + 2.2vw, 4rem);
+  --grid-gap: clamp(1.25rem, 1rem + 1vw, 2.5rem);
+
+  /* ---- Radius ---- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 32px;
+  --radius-full: 999px;
+  /* Signature asymmetric radius, reused consistently on media containers
+     across the site (hero excluded — it's full-bleed). One repeated
+     detail reads as intentional; scattering it everywhere would not. */
+  --radius-signature: var(--radius-lg) var(--radius-xs) var(--radius-lg) var(--radius-xs);
+
+  /* ---- Shadows (diffused, warm-tinted, studio-light) ---- */
+  --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.05);
+  --shadow-sm: 0 6px 20px -6px hsl(var(--shadow-color) / 0.10);
+  --shadow-md: 0 16px 48px -10px hsl(var(--shadow-color) / 0.13);
+  --shadow-lg: 0 28px 80px -14px hsl(var(--shadow-color) / 0.16);
+  --shadow-focus: 0 0 0 3px hsl(199deg 55% 40% / 0.4);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 220ms;
+  --duration-base: 420ms;
+  --duration-slow: 720ms;
+
+  /* ---- Z-index scale ---- */
+  --z-nav: 100;
+  --z-mobile-cta: 300;
+  --z-overlay: 500;
+}
+
+/* ==========================================================================
+   2. RESET
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01" 1, "kern" 1;
+}
+
+img,
+picture,
+svg {
+  display: block;
+  max-inline-size: 100%;
+}
+
+img {
+  block-size: auto;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
+ul,
+ol {
+  padding-inline-start: 1.2em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--weight-regular);
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   3. LAYOUT PRIMITIVES
+   ========================================================================== */
+
+.container {
+  inline-size: min(100% - (var(--container-padding) * 2), var(--container-max));
+  margin-inline: auto;
+}
+
+.container--narrow {
+  inline-size: min(100% - (var(--container-padding) * 2), var(--container-narrow));
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  inset-block-start: -100%;
+  inset-inline-start: var(--space-sm);
+  z-index: var(--z-overlay);
+  padding: var(--space-2xs) var(--space-sm);
+  background: var(--color-ink);
+  color: var(--color-porcelain);
+  border-radius: var(--radius-sm);
+  transition: inset-block-start var(--duration-fast) var(--ease-out);
+}
+
+.skip-link:focus-visible {
+  inset-block-start: var(--space-sm);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-xs);
+}
+
+/* ==========================================================================
+   4. TYPOGRAPHY UTILITIES
+   ========================================================================== */
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-family: var(--font-label);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wider);
+  text-transform: uppercase;
+  color: var(--color-accent-strong);
+  margin-block-end: var(--space-sm);
+}
+
+.eyebrow::before {
+  content: "";
+  inline-size: 22px;
+  block-size: 1px;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-accent-strong);
+  padding-block-end: 2px;
+  border-block-end: 1px solid currentColor;
+  transition: gap var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
+}
+
+.text-link:hover {
+  gap: var(--space-xs);
+  opacity: 0.72;
+}
+
+.text-link span {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.text-link:hover span {
+  transform: translateX(3px);
+}
+
+/* ==========================================================================
+   5. BUTTONS
+   ========================================================================== */
+
+.btn {
+  --btn-bg: var(--color-emerald);
+  --btn-fg: var(--color-porcelain);
+  --btn-border: transparent;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  padding-block: 0.95em;
+  padding-inline: 1.9em;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-normal);
+  border-radius: var(--radius-full);
+  background-color: var(--btn-bg);
+  color: var(--btn-fg);
+  border: 1px solid var(--btn-border);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    letter-spacing var(--duration-base) var(--ease-out),
+    background-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-in-out);
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-gold);
+  transform: translateY(101%);
+  transition: transform var(--duration-base) var(--ease-in-out);
+}
+
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  color: var(--color-ink);
+  letter-spacing: 0.01em;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn--primary:hover::before,
+.btn--primary:focus-visible::before {
+  transform: translateY(0);
+}
+
+.btn--ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--color-ink);
+  --btn-border: var(--color-ink);
+}
+
+.btn--ghost:hover,
+.btn--ghost:focus-visible {
+  --btn-bg: var(--color-ink);
+  --btn-fg: var(--color-porcelain);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--large {
+  padding-block: 1.15em;
+  padding-inline: 2.4em;
+  font-size: var(--text-base);
+}
+
+.btn--nav-cta {
+  padding-block: 0.7em;
+  padding-inline: 1.5em;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.btn:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+/* ==========================================================================
+   6. SITE HEADER / NAVIGATION
+   ========================================================================== */
+
+.site-header {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: var(--z-nav);
+  padding-block: var(--space-sm);
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    backdrop-filter var(--duration-base) var(--ease-out),
+    padding-block var(--duration-base) var(--ease-out);
+}
+
+.site-header[data-scrolled="true"] {
+  background-color: hsl(205deg 30% 98% / 0.72);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  box-shadow: var(--shadow-xs);
+  padding-block: var(--space-xs);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.site-header__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-tight);
+}
+
+.site-nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.site-nav__toggle {
+  display: none;
+}
+
+.site-nav__menu {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.25rem, 1rem + 1.2vw, 2.75rem);
+}
+
+.site-nav__link {
+  position: relative;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  padding-block: var(--space-3xs);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.site-nav__link::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-end: 0;
+  inline-size: 100%;
+  block-size: 1px;
+  background: var(--color-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.site-nav__link:hover::after,
+.site-nav__link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Active-section state — was previously set by JS but never styled.
+   Weight shift + permanent underline reads clearly without shouting. */
+.site-nav__link[aria-current="true"] {
+  color: var(--color-accent-strong);
+  font-weight: var(--weight-semibold);
+}
+
+.site-nav__link[aria-current="true"]::after {
+  transform: scaleX(1);
+}
+
+/* ==========================================================================
+   7. SECTION RHYTHM (alternating background + soft gradient seams)
+   ========================================================================== */
+
+section {
+  padding-block: var(--space-2xl);
+  position: relative;
+  /* Offscreen sections skip layout/paint work until they're near the
+     viewport — meaningful savings on a long, image-heavy page. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+.hero {
+  content-visibility: visible;
+}
+
+.hero,
+.trust-strip,
+.philosophy,
+.smile-gallery,
+.pricing-note,
+.appointment {
+  background-color: var(--color-bg);
+}
+
+.treatments,
+.process,
+.team,
+.faq {
+  background-color: var(--color-bg-alt);
+}
+
+.technology,
+.clinic-space {
+  background-color: var(--color-emerald-deep);
+  color: var(--color-porcelain);
+}
+
+.testimonials {
+  background-color: var(--color-ink);
+  color: var(--color-porcelain);
+}
+
+/* Soft seams: a short gradient blend at the top of each dark section so
+   the transition from a light section reads as a fade, not a hard cut. */
+.technology::before,
+.testimonials::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: clamp(48px, 6vw, 96px);
+  background: linear-gradient(180deg, hsl(205deg 20% 96% / 0.06), transparent);
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   8. HERO
+   ========================================================================== */
+
+.hero {
+  min-block-size: 100vh;
+  min-block-size: 100dvh;
+  display: flex;
+  align-items: flex-end;
+  padding-block: var(--space-3xl) var(--space-2xl);
+  overflow: hidden;
+}
+
+.hero__media {
+  position: absolute;
+  inset: 0;
+}
+
+.hero__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(0.9) brightness(0.97);
+}
+
+.hero__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Strong enough at the bottom (where the text sits) to stay legible
+     regardless of how bright the underlying photo is — a clinic interior
+     shot is mostly white surfaces, so a subtle overlay alone isn't a
+     reliable enough guarantee. */
+  background: linear-gradient(
+    180deg,
+    hsl(208deg 20% 8% / 0.22) 0%,
+    hsl(208deg 20% 6% / 0.5) 50%,
+    hsl(208deg 20% 5% / 0.82) 100%
+  );
+}
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  color: var(--color-porcelain);
+  max-inline-size: 46rem;
+  opacity: 0;
+  transform: translateY(24px);
+  /* Belt-and-suspenders legibility: even where the overlay above is
+     lightest, a soft shadow keeps text readable against a busy photo. */
+  text-shadow: 0 2px 20px hsl(208deg 30% 4% / 0.45);
+}
+
+.hero__eyebrow {
+  color: var(--color-mint);
+}
+
+.hero__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin-block-end: var(--space-md);
+}
+
+.hero__subheading {
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  max-inline-size: 34ch;
+  color: hsl(205deg 25% 94%);
+  margin-block-end: var(--space-lg);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.hero .btn--ghost {
+  --btn-fg: var(--color-porcelain);
+  --btn-border: hsl(205deg 25% 94% / 0.5);
+}
+
+.hero .btn--ghost:hover {
+  --btn-bg: var(--color-porcelain);
+  --btn-fg: var(--color-ink);
+}
+
+/* Scroll cue — small, confident, gives the fold somewhere to point.
+   Static by design: a perpetually-looping animation for a purely
+   decorative element isn't worth the ongoing repaint cost. */
+.hero__scroll-cue {
+  position: absolute;
+  z-index: 1;
+  inset-block-end: var(--space-lg);
+  inset-inline-end: var(--container-padding);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  color: hsl(205deg 25% 92% / 0.75);
+  text-shadow: 0 2px 12px hsl(208deg 30% 4% / 0.4);
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.hero__scroll-cue:hover {
+  opacity: 0.7;
+}
+
+.hero__scroll-cue-line {
+  inline-size: 1px;
+  block-size: 32px;
+  background: currentColor;
+}
+
+.hero__scroll-cue-label {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+}
+
+@media (max-width: 960px) {
+  .hero__scroll-cue { display: none; }
+}
+
+/* Kısa/yatay ekranlarda (ör. yan çevrilmiş telefon) fluid dikey padding
+   viewport genişliğine göre büyüdüğü için gerçek yüksekliğe göre aşırı
+   kalabiliyor — içerik taşmasını önlemek için burada sınırlandırılıyor. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .hero {
+    min-block-size: auto;
+    padding-block: var(--space-xl);
+  }
+}
+
+/* ==========================================================================
+   9. TRUST STRIP
+   ========================================================================== */
+
+.trust-strip {
+  padding-block: var(--space-lg);
+  border-block-end: 1px solid var(--color-border);
+}
+
+.trust-strip__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.trust-strip__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(1.5rem, 1rem + 2.5vw, 4.5rem);
+}
+
+.trust-strip__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.trust-strip__number {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent-strong);
+}
+
+.trust-strip__label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   10. PHILOSOPHY / MANIFESTO
+   ========================================================================== */
+
+.philosophy__inner {
+  max-inline-size: var(--container-narrow);
+  text-align: start;
+}
+
+.philosophy__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  margin-block-end: var(--space-lg);
+}
+
+.philosophy__heading em {
+  font-style: italic;
+  font-weight: var(--weight-medium);
+  color: var(--color-accent-strong);
+}
+
+.philosophy__body {
+  font-size: var(--text-md);
+  line-height: var(--leading-loose);
+  color: var(--color-text-muted);
+  max-inline-size: 62ch;
+  margin-block-end: var(--space-md);
+}
+
+/* ==========================================================================
+   11. TREATMENTS
+   ========================================================================== */
+
+.treatments__header {
+  max-inline-size: var(--container-narrow);
+  margin-block-end: var(--space-xl);
+}
+
+.treatments__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+}
+
+.treatments__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--grid-gap);
+}
+
+.treatment-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--space-lg) var(--space-md);
+  background-color: var(--color-porcelain);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    border-color var(--duration-base) var(--ease-out);
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.treatment-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-md);
+  border-color: transparent;
+}
+
+/* Oversized ghost numeral — a quiet index device that replaces the
+   generic "icon + title + text" card formula with something specific
+   to the brand's precision-instrument language. */
+.treatment-card__index {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: -0.35em;
+  inset-inline-end: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 3rem + 4vw, 7rem);
+  font-weight: var(--weight-regular);
+  color: var(--color-sand);
+  line-height: 1;
+  transition: color var(--duration-base) var(--ease-out);
+}
+
+.treatment-card:hover .treatment-card__index {
+  color: var(--color-sage-soft);
+}
+
+.treatment-card__icon {
+  inline-size: 52px;
+  block-size: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-sage-soft);
+  margin-block-end: var(--space-md);
+  transition: background-color var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out);
+}
+
+.treatment-card:hover .treatment-card__icon {
+  background-color: var(--color-sage);
+  transform: translateY(-2px);
+}
+
+.treatment-card__title {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
+  margin-block-end: var(--space-xs);
+}
+
+.treatment-card__description {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-body);
+  margin-block-end: var(--space-md);
+}
+
+.treatment-card__link {
+  margin-block-start: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-accent-strong);
+}
+
+.treatment-card__link span {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.treatment-card__link:hover span {
+  transform: translateX(4px);
+}
+
+/* ==========================================================================
+   12. TECHNOLOGY
+   ========================================================================== */
+
+.technology__inner {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: var(--space-2xl);
+  align-items: center;
+}
+
+.technology .eyebrow {
+  color: var(--color-mint);
+}
+
+.technology__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  margin-block-end: var(--space-md);
+}
+
+.technology__body {
+  font-size: var(--text-md);
+  line-height: var(--leading-loose);
+  color: hsl(205deg 20% 88%);
+  max-inline-size: 46ch;
+  margin-block-end: var(--space-lg);
+}
+
+.technology__list {
+  display: grid;
+  gap: var(--space-md);
+  border-block-start: 1px solid hsl(205deg 20% 90% / 0.16);
+  padding-block-start: var(--space-md);
+}
+
+.technology__item {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.technology__item-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+
+.technology__item-text {
+  font-size: var(--text-sm);
+  color: hsl(205deg 15% 78%);
+}
+
+.technology__media {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-signature);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.technology__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+/* ==========================================================================
+   13. PROCESS
+   ========================================================================== */
+
+.process__header {
+  max-inline-size: var(--container-narrow);
+  margin-block-end: var(--space-xl);
+}
+
+.process__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tight);
+}
+
+.process__steps {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-md);
+  counter-reset: step;
+}
+
+.process__step {
+  position: relative;
+  padding-block-start: var(--space-md);
+  border-block-start: 1px solid var(--color-border);
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+/* A small filled node at the start of each step's rule line — reads as a
+   measurement/timeline marker rather than a plain divider. */
+.process__step::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -4px;
+  inset-inline-start: 0;
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: var(--color-accent-strong);
+}
+
+.process__step-number {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--color-accent);
+  margin-block-end: var(--space-sm);
+}
+
+.process__step-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  margin-block-end: var(--space-2xs);
+}
+
+.process__step-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-body);
+}
+
+/* ==========================================================================
+   14. SMILE GALLERY / BEFORE-AFTER
+   ========================================================================== */
+
+.smile-gallery__header {
+  max-inline-size: var(--container-narrow);
+  margin-block-end: var(--space-xl);
+}
+
+.smile-gallery__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tight);
+  margin-block-end: var(--space-sm);
+}
+
+.smile-gallery__subheading {
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+}
+
+.smile-gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--grid-gap);
+  margin-block-end: var(--space-lg);
+}
+
+.before-after-card {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.before-after-card__media {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-signature);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  cursor: zoom-in;
+  transition: box-shadow var(--duration-base) var(--ease-out);
+}
+
+.before-after-card:hover .before-after-card__media {
+  box-shadow: var(--shadow-md);
+}
+
+.before-after-card__image {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.before-after-card__image--after {
+  clip-path: inset(0 0 0 50%);
+}
+
+.before-after-card__slider {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 50%;
+  inline-size: 2px;
+  background: var(--color-porcelain);
+  cursor: ew-resize;
+  transition: inset-inline-start var(--duration-fast) var(--ease-out);
+}
+
+.before-after-card__slider::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-porcelain);
+  box-shadow: var(--shadow-sm);
+}
+
+.before-after-card__slider:focus-visible {
+  box-shadow: none;
+}
+
+.before-after-card__slider:focus-visible::before {
+  box-shadow: var(--shadow-focus);
+}
+
+.before-after-card__caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-block-start: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.before-after-card__patient {
+  font-weight: var(--weight-semibold);
+}
+
+.before-after-card__treatment {
+  color: var(--color-text-muted);
+}
+
+.smile-gallery__footer {
+  display: flex;
+  justify-content: center;
+}
+
+/* ==========================================================================
+   15. TEAM
+   ========================================================================== */
+
+.team__header {
+  max-inline-size: var(--container-narrow);
+  margin-block-end: var(--space-xl);
+}
+
+.team__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tight);
+}
+
+.team__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--grid-gap);
+}
+
+.team-card {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.team-card__media {
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-signature);
+  overflow: hidden;
+  margin-block-end: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.team-card__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-out), filter var(--duration-slow) var(--ease-out);
+  filter: saturate(0.94);
+}
+
+.team-card:hover .team-card__image {
+  transform: scale(1.06);
+  filter: saturate(1.02);
+}
+
+.team-card__name {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
+  margin-block-end: var(--space-3xs);
+}
+
+.team-card__role {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-accent-strong);
+  margin-block-end: var(--space-sm);
+}
+
+.team-card__bio {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-body);
+}
+
+/* ==========================================================================
+   16. CLINIC SPACE
+   ========================================================================== */
+
+.clinic-space__header {
+  max-inline-size: var(--container-narrow);
+  margin-inline: auto;
+  text-align: center;
+  margin-block-end: var(--space-xl);
+}
+
+.clinic-space .eyebrow {
+  color: var(--color-mint);
+  justify-content: center;
+}
+
+.clinic-space__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tight);
+}
+
+.clinic-space__gallery {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: var(--space-sm);
+  padding-inline: var(--container-padding);
+}
+
+.clinic-space__item {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: zoom-in;
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+.clinic-space__item img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.clinic-space__item:hover img {
+  transform: scale(1.04);
+}
+
+.clinic-space__item figcaption {
+  position: absolute;
+  inset-block-end: var(--space-sm);
+  inset-inline-start: var(--space-sm);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-porcelain);
+  padding: var(--space-3xs) var(--space-xs);
+  background: hsl(208deg 15% 8% / 0.68);
+  border-radius: var(--radius-full);
+}
+
+/* ==========================================================================
+   17. TESTIMONIALS
+   ========================================================================== */
+
+.testimonials__header {
+  max-inline-size: var(--container-narrow);
+  margin-block-end: var(--space-xl);
+}
+
+.testimonials .eyebrow {
+  color: var(--color-mint);
+}
+
+.testimonials__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* The viewport clips the sliding track; the track itself is flex from the
+   start (not mutated into shape by JS) so there's no layout jump on load. */
+.testimonials__viewport {
+  overflow: hidden;
+}
+
+.testimonials__track {
+  display: flex;
+  will-change: transform;
+}
+
+.testimonial-card {
+  flex: 0 0 100%;
+  min-inline-size: 0;
+  position: relative;
+  padding: var(--space-xl) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+/* Oversized decorative quotation mark — editorial signature detail. */
+.testimonial-card::before {
+  content: "“";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: var(--space-lg);
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 3rem + 3vw, 6.5rem);
+  line-height: 1;
+  color: hsl(205deg 20% 90% / 0.12);
+}
+
+.testimonial-card__quote {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-snug);
+  font-style: italic;
+  max-inline-size: 34ch;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.testimonial-card__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3xs);
+}
+
+.testimonial-card__name {
+  font-style: normal;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.testimonial-card__treatment {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: hsl(205deg 15% 65%);
+}
+
+/* Slider controls — rendered by JS, styled here as first-class components. */
+.js-testimonial-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  margin-block-start: var(--space-lg);
+}
+
+.js-testimonial-arrow {
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--radius-full);
+  border: 1px solid hsl(205deg 20% 90% / 0.35);
+  color: inherit;
+  opacity: 0.6;
+  display: grid;
+  place-items: center;
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+}
+
+.js-testimonial-arrow:hover {
+  opacity: 1;
+  border-color: var(--color-gold);
+  transform: translateY(-2px);
+}
+
+.js-testimonial-dots {
+  display: flex;
+  gap: var(--space-2xs);
+}
+
+.js-testimonial-dot {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  opacity: 0.3;
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+}
+
+.js-testimonial-dot:hover {
+  opacity: 0.7;
+}
+
+.js-testimonial-dot[aria-selected="true"] {
+  opacity: 1;
+  transform: scale(1.3);
+}
+
+/* ==========================================================================
+   18. PRICING NOTE
+   ========================================================================== */
+
+.pricing-note__inner {
+  max-inline-size: var(--container-narrow);
+  text-align: center;
+  margin-inline: auto;
+}
+
+.pricing-note .eyebrow {
+  justify-content: center;
+}
+
+.pricing-note__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tight);
+  margin-block-end: var(--space-md);
+}
+
+.pricing-note__body {
+  font-size: var(--text-md);
+  color: var(--color-text-muted);
+  line-height: var(--leading-loose);
+  margin-block-end: var(--space-md);
+}
+
+/* ==========================================================================
+   19. FAQ
+   ========================================================================== */
+
+.faq__header {
+  max-inline-size: var(--container-narrow);
+  margin-block-end: var(--space-xl);
+}
+
+.faq__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  letter-spacing: var(--tracking-tight);
+}
+
+.faq__list {
+  max-inline-size: var(--container-narrow);
+  display: grid;
+}
+
+.faq-item {
+  border-block-end: 1px solid var(--color-border);
+  padding-block: var(--space-md);
+}
+
+.faq-item__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: var(--weight-regular);
+  cursor: pointer;
+  list-style: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.faq-item__question:hover {
+  color: var(--color-accent-strong);
+}
+
+.faq-item__question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item__icon {
+  position: relative;
+  flex-shrink: 0;
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.faq-item__icon::before,
+.faq-item__icon::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 50%;
+  inline-size: 100%;
+  block-size: 1px;
+  background: currentColor;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.faq-item__icon::after {
+  transform: rotate(90deg);
+}
+
+.faq-item[open] .faq-item__icon::after {
+  transform: rotate(0deg);
+}
+
+.faq-item__answer {
+  padding-block-start: var(--space-sm);
+  max-inline-size: 62ch;
+}
+
+.faq-item__answer p {
+  font-size: var(--text-base);
+  color: var(--color-text-muted);
+  line-height: var(--leading-body);
+}
+
+/* ==========================================================================
+   20. APPOINTMENT / CONTACT
+   ========================================================================== */
+
+.appointment__inner {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: var(--space-2xl);
+  margin-block-end: var(--space-xl);
+}
+
+.appointment__heading {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+  margin-block-end: var(--space-md);
+}
+
+.appointment__body {
+  font-size: var(--text-md);
+  color: var(--color-text-muted);
+  line-height: var(--leading-loose);
+  max-inline-size: 40ch;
+  margin-block-end: var(--space-lg);
+}
+
+.appointment__contact-info {
+  font-style: normal;
+  display: grid;
+  gap: var(--space-sm);
+  padding-block-start: var(--space-lg);
+  border-block-start: 1px solid var(--color-border);
+}
+
+.appointment__contact-line {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--space-sm);
+  font-size: var(--text-sm);
+}
+
+.appointment__contact-label {
+  color: var(--color-text-muted);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  font-size: var(--text-xs);
+}
+
+.appointment__contact-line a {
+  border-block-end: 1px solid transparent;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.appointment__contact-line a:hover {
+  border-color: var(--color-ink);
+}
+
+/* ---- Form ---- */
+
+.appointment-form {
+  display: grid;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.appointment-form__row {
+  display: grid;
+  gap: var(--space-2xs);
+  position: relative;
+}
+
+.appointment-form__label {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.appointment-form__input {
+  appearance: none;
+  inline-size: 100%;
+  padding-block: var(--space-xs);
+  padding-inline: 0;
+  background: transparent;
+  border: none;
+  border-block-end: 1px solid var(--color-border);
+  border-radius: 0;
+  font-size: var(--text-base);
+  color: var(--color-text);
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.appointment-form__input:hover {
+  border-color: var(--color-stone);
+}
+
+.appointment-form__input:focus-visible {
+  outline: none;
+  border-color: var(--color-accent-strong);
+  box-shadow: none;
+}
+
+.appointment-form__input[aria-invalid="true"] {
+  border-color: var(--color-terracotta);
+}
+
+.appointment-form__input--textarea {
+  resize: vertical;
+  min-block-size: 6rem;
+}
+
+select.appointment-form__input {
+  background-image: linear-gradient(45deg, transparent 50%, var(--color-stone) 50%),
+                     linear-gradient(135deg, var(--color-stone) 50%, transparent 50%);
+  background-position: calc(100% - 6px) center, calc(100% - 1px) center;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.appointment-form__submit {
+  margin-block-start: var(--space-sm);
+  inline-size: fit-content;
+}
+
+.appointment-form__note {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* Inline validation error, injected by JS beneath the offending field. */
+.js-field-error {
+  color: var(--color-terracotta);
+  font-size: var(--text-xs);
+  margin-block-start: var(--space-3xs);
+}
+
+/* Success state, swapped in for the form's contents on submit. */
+.appointment-form__success {
+  padding: var(--space-lg);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-sage-soft);
+  color: var(--color-accent-strong);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.appointment__map {
+  inline-size: 100%;
+  block-size: clamp(320px, 40vw, 520px);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-inline: auto;
+  max-inline-size: var(--container-max);
+}
+
+.appointment__map-frame {
+  inline-size: 100%;
+  block-size: 100%;
+  border: none;
+  filter: grayscale(0.3) contrast(1.05);
+}
+
+/* ==========================================================================
+   21. FOOTER
+   ========================================================================== */
+
+.site-footer {
+  background-color: var(--color-ink);
+  color: hsl(205deg 20% 88%);
+  padding-block-start: var(--space-2xl);
+}
+
+.site-footer__inner {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-areas:
+    "brand links"
+    "social links";
+  gap: var(--space-xl) var(--space-lg);
+  padding-block-end: var(--space-2xl);
+  border-block-end: 1px solid hsl(205deg 20% 90% / 0.12);
+}
+
+.site-footer__brand {
+  grid-area: brand;
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.site-footer__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--color-porcelain);
+}
+
+.site-footer__tagline {
+  font-size: var(--text-sm);
+  color: hsl(205deg 15% 65%);
+  max-inline-size: 26ch;
+}
+
+.site-footer__links {
+  grid-area: links;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+}
+
+.site-footer__column-title {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-porcelain);
+  margin-block-end: var(--space-sm);
+}
+
+.site-footer__list {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.site-footer__list a,
+.site-footer__list li {
+  font-size: var(--text-sm);
+  color: hsl(205deg 15% 70%);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.site-footer__list a:hover {
+  color: var(--color-porcelain);
+}
+
+.site-footer__social {
+  grid-area: social;
+  align-self: end;
+  display: flex;
+  gap: var(--space-md);
+}
+
+.site-footer__social a {
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: hsl(205deg 15% 70%);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.site-footer__social a:hover {
+  color: var(--color-mint);
+}
+
+.site-footer__bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding-block: var(--space-md);
+}
+
+.site-footer__copyright,
+.site-footer__legal a {
+  font-size: var(--text-xs);
+  color: hsl(205deg 15% 55%);
+}
+
+.site-footer__legal {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.site-footer__legal a:hover {
+  color: var(--color-porcelain);
+}
+
+/* ==========================================================================
+   22. SCROLL-REVEAL READY STATES
+   ========================================================================== */
+
+.hero__content,
+.treatment-card,
+.before-after-card,
+.team-card,
+.clinic-space__item,
+.testimonial-card,
+.process__step {
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+.hero__content.is-visible,
+.treatment-card.is-visible,
+.before-after-card.is-visible,
+.team-card.is-visible,
+.clinic-space__item.is-visible,
+.testimonial-card.is-visible,
+.process__step.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.treatment-card:nth-child(1) { transition-delay: 0ms; }
+.treatment-card:nth-child(2) { transition-delay: 60ms; }
+.treatment-card:nth-child(3) { transition-delay: 120ms; }
+.treatment-card:nth-child(4) { transition-delay: 180ms; }
+.treatment-card:nth-child(5) { transition-delay: 240ms; }
+.treatment-card:nth-child(6) { transition-delay: 300ms; }
+
+.process__step:nth-child(1) { transition-delay: 0ms; }
+.process__step:nth-child(2) { transition-delay: 80ms; }
+.process__step:nth-child(3) { transition-delay: 160ms; }
+.process__step:nth-child(4) { transition-delay: 240ms; }
+.process__step:nth-child(5) { transition-delay: 320ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__content,
+  .treatment-card,
+  .before-after-card,
+  .team-card,
+  .clinic-space__item,
+  .testimonial-card,
+  .process__step {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   23. RESPONSIVE — DESKTOP FIRST
+   Breakpoints: Large Desktop (default) → Laptop (1280) → Tablet (960) → Mobile (600)
+   ========================================================================== */
+
+/* ---- Laptop ---- */
+@media (max-width: 1280px) {
+  .treatments__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* team__grid ve smile-gallery__grid burada 2 sütuna düşürülmüyor:
+     her ikisi de 3 öğe içeriyor ve 2 sütunda 3. öğe yalnız kalıp
+     yanında büyük bir boşluk bırakıyordu. 960px'te doğrudan tek
+     sütuna geçiyorlar (aşağıya bakınız). */
+
+  .technology__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .technology__media {
+    order: -1;
+    aspect-ratio: 16 / 9;
+  }
+
+  .appointment__inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Tablet ---- */
+@media (max-width: 960px) {
+
+  .site-nav__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .site-nav__toggle-icon {
+    position: relative;
+    inline-size: 20px;
+    block-size: 14px;
+  }
+
+  .site-nav__toggle-icon::before,
+  .site-nav__toggle-icon::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    block-size: 1px;
+    background: currentColor;
+    transition: transform var(--duration-base) var(--ease-out), inset-block-start var(--duration-base) var(--ease-out);
+  }
+
+  .site-nav__toggle-icon::before { inset-block-start: 0; }
+  .site-nav__toggle-icon::after { inset-block-end: 0; }
+
+  /* Hamburger → X, driven by the button's own aria-expanded state. */
+  .site-nav__toggle[aria-expanded="true"] .site-nav__toggle-icon::before {
+    inset-block-start: 6px;
+    transform: rotate(45deg);
+  }
+
+  .site-nav__toggle[aria-expanded="true"] .site-nav__toggle-icon::after {
+    inset-block-end: 6px;
+    transform: rotate(-45deg);
+  }
+
+  .site-nav__menu {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-overlay);
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--container-padding);
+    background-color: var(--color-porcelain);
+    transform: translateX(100%);
+    transition: transform var(--duration-base) var(--ease-in-out);
+  }
+
+  .site-nav__menu[data-open="true"] {
+    transform: translateX(0);
+  }
+
+  .site-nav__link {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+  }
+
+  .process__steps {
+    grid-template-columns: 1fr;
+  }
+
+  .team__grid,
+  .smile-gallery__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .clinic-space__gallery {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .clinic-space__item:first-child {
+    grid-column: span 2;
+    aspect-ratio: 16 / 9;
+  }
+
+  .testimonial-card__quote {
+    font-size: var(--text-lg);
+  }
+
+  .site-footer__inner {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "brand"
+      "links"
+      "social";
+  }
+
+  .site-footer__links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---- Mobile ---- */
+@media (max-width: 600px) {
+
+  section {
+    padding-block: var(--space-xl);
+  }
+
+  .hero {
+    align-items: flex-end;
+    padding-block-end: var(--space-xl);
+  }
+
+  .hero__content {
+    max-inline-size: 100%;
+  }
+
+  .hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* The bottom sticky CTA (added by JS) takes over primary conversion
+     duty on small screens — decluttering the header of a repeated CTA. */
+  .btn--nav-cta {
+    display: none;
+  }
+
+  /* With the nav CTA gone, the hamburger toggle would otherwise center
+     itself in the leftover flex space instead of sitting flush with the
+     right edge where users expect it. */
+  .site-nav {
+    justify-content: flex-end;
+  }
+
+  .trust-strip__inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .treatments__grid,
+  .team__grid,
+  .smile-gallery__grid,
+  .process__steps {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonial-card {
+    padding: var(--space-lg) var(--space-sm);
+  }
+
+  .testimonial-card::before {
+    inset-inline-start: var(--space-sm);
+  }
+
+  .clinic-space__gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .clinic-space__item:first-child {
+    grid-column: span 1;
+  }
+
+  .appointment-form {
+    padding: var(--space-md);
+  }
+
+  .appointment__contact-line {
+    grid-template-columns: 1fr;
+    gap: var(--space-3xs);
+  }
+
+  .site-footer__links {
+    grid-template-columns: 1fr;
+  }
+
+  .site-footer__bottom-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ==========================================================================
+   24. LARGE DESKTOP REFINEMENT
+   ========================================================================== */
+
+@media (min-width: 1800px) {
+  :root {
+    --container-max: 1560px;
+  }
+}
+
+/* ==========================================================================
+   25. JS-INJECTED UI COMPONENTS
+   These elements are created at runtime (back-to-top, cursor, lightbox,
+   scroll progress, mobile CTA, ripple). Styling them here — rather than
+   as inline styles from JS — keeps behavior and appearance properly
+   separated and easier to maintain.
+   ========================================================================== */
+
+/* ---- Scroll progress ---- */
+.js-scroll-progress {
+  position: fixed;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  block-size: 3px;
+  inline-size: 0%;
+  background-color: var(--color-accent-strong);
+  z-index: var(--z-nav);
+  pointer-events: none;
+}
+
+/* ---- Back to top ---- */
+.js-back-to-top {
+  position: fixed;
+  inset-block-end: var(--space-md);
+  inset-inline-end: var(--space-md);
+  inline-size: 48px;
+  block-size: 48px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-ink);
+  color: var(--color-porcelain);
+  font-size: 1.1rem;
+  display: grid;
+  place-items: center;
+  z-index: var(--z-mobile-cta);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  box-shadow: var(--shadow-sm);
+  transition: opacity var(--duration-base) var(--ease-out), transform var(--duration-base) var(--ease-out), visibility var(--duration-base);
+}
+
+.js-back-to-top.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.js-back-to-top:hover {
+  transform: translateY(-3px);
+}
+
+/* On mobile the sticky CTA bar occupies the bottom strip of the screen —
+   without this, the back-to-top button would render in the same spot and
+   the two would visually collide. */
+@media (max-width: 600px) {
+  .js-back-to-top {
+    inset-block-end: calc(var(--space-md) + 68px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ---- Mobile sticky CTA ---- */
+.js-mobile-cta {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .js-mobile-cta {
+    display: flex;
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: var(--z-mobile-cta);
+    padding: var(--space-xs) var(--space-sm);
+    padding-block-end: max(var(--space-xs), env(safe-area-inset-bottom));
+    background-color: hsl(205deg 30% 98% / 0.9);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border-block-start: 1px solid var(--color-border);
+    transform: translateY(100%);
+    transition: transform var(--duration-base) var(--ease-in-out);
+  }
+
+  .js-mobile-cta.is-visible {
+    transform: translateY(0);
+  }
+
+  .js-mobile-cta .btn {
+    inline-size: 100%;
+  }
+}
+
+/* ---- Button ripple ---- */
+.js-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background-color: currentColor;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* ---- Lightbox ---- */
+.js-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: hsl(208deg 15% 6% / 0.96);
+  padding: clamp(1.5rem, 4vw, 4rem);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-out), visibility var(--duration-base);
+}
+
+.js-lightbox.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.js-lightbox__figure {
+  position: relative;
+  max-inline-size: min(90vw, 1000px);
+  max-block-size: 85vh;
+}
+
+.js-lightbox__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+}
+
+.js-lightbox__close,
+.js-lightbox__nav {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  color: var(--color-porcelain);
+  background-color: hsl(208deg 15% 10% / 0.55);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
+}
+
+.js-lightbox__close:hover,
+.js-lightbox__nav:hover {
+  opacity: 1;
+  background-color: hsl(208deg 15% 10% / 0.8);
+}
+
+/* Positioned inside the figure's own bounds (not floating above/beside
+   it) so it can never be clipped by the viewport edge on short or
+   narrow screens; sized for a comfortable ~44px touch target. */
+.js-lightbox__close {
+  inset-block-start: var(--space-sm);
+  inset-inline-end: var(--space-sm);
+  inline-size: 44px;
+  block-size: 44px;
+  font-size: 1.1rem;
+}
+
+.js-lightbox__nav {
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  inline-size: 44px;
+  block-size: 44px;
+  font-size: 1.25rem;
+}
+
+.js-lightbox__nav:hover {
+  transform: translateY(-50%) scale(1.06);
+}
+
+.js-lightbox__nav--prev {
+  inset-inline-start: var(--space-sm);
+}
+
+.js-lightbox__nav--next {
+  inset-inline-end: var(--space-sm);
+}
