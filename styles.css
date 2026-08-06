@@ -1,6 +1,22 @@
 /* ==========================================================================
-   AURA DENTAL — Design System & Stylesheet (v3 — mobile bugfix pass)
+   AURA DENTAL — Design System & Stylesheet (v4 — mobile menu + gallery fix)
    Editorial / Scandinavian / Luxury Healthcare
+
+   Changelog vs. v3:
+   - The mobile menu's link size/spacing was still oversized enough to
+     need internal scrolling on ordinary phones (a leftover from v3's
+     fix, which solved the "content clipped off-screen" problem but
+     overcorrected on top padding). Links and gaps are now genuinely
+     compact — all 8 fit without scrolling on real phone viewports —
+     with overflow-y kept only as a safety net, not the expected path.
+   - The before/after gallery's lightbox only ever looked at the "after"
+     photos — the "before" photos couldn't be opened larger at all.
+     Both are wired up now, in natural before → after → before... order.
+   - Removed the now-unreachable "click the photo to jump the compare
+     handle there" behavior: since both photos together always cover
+     100% of the card and both now open the lightbox on click, that
+     handler could never fire anymore. Dragging the handle remains the
+     one, unambiguous way to compare — click always means "view larger".
 
    Changelog vs. v2 (mobile-specific fixes — found by re-reading every
    file end to end, not just spot-checking):
@@ -2009,8 +2025,15 @@ select.appointment-form__input {
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    gap: var(--space-md);
-    padding: calc(var(--container-padding) + 3.5rem) var(--container-padding) var(--container-padding);
+    gap: clamp(0.5rem, 0.4rem + 1vw, 1rem);
+    /* A fixed, modest top offset — just enough to clear the header/close
+       button — rather than stacking on top of the already-fluid
+       container padding. Combined with the compact link sizing below,
+       all eight links comfortably fit on ordinary phone screens without
+       scrolling. overflow-y stays on purely as a safety net for unusual
+       cases (e.g. a user's accessibility text-size setting), never as
+       the expected behavior. */
+    padding: 4rem var(--container-padding) 2rem;
     background-color: var(--color-porcelain);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -2024,7 +2047,7 @@ select.appointment-form__input {
 
   .site-nav__link {
     font-family: var(--font-display);
-    font-size: var(--text-xl);
+    font-size: clamp(1.125rem, 1rem + 1.5vw, 1.375rem);
   }
 
   .process__steps {

@@ -722,11 +722,6 @@
         });
       });
 
-      media.addEventListener('click', (e) => {
-        if (e.target === handle) return;
-        positionFromPointer(e.clientX);
-      });
-
       handle.addEventListener('keydown', (e) => {
         const current = parseFloat(handle.getAttribute('aria-valuenow')) || 50;
         const step = 5;
@@ -756,7 +751,11 @@
 
   function initGalleryLightbox() {
     const groups = {
-      'smile-gallery': Array.from(document.querySelectorAll('.before-after-card__image--after')),
+      'smile-gallery': Array.from(
+        document.querySelectorAll(
+          '.before-after-card__image--before, .before-after-card__image--after'
+        )
+      ),
       'clinic-space': Array.from(document.querySelectorAll('.clinic-space__item img'))
     };
 
