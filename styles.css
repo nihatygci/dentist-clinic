@@ -2054,6 +2054,16 @@ select.appointment-form__input {
     margin: calc(var(--space-2xs) * -1);
   }
 
+  /* .site-nav is flex:1 + justify-content:center so it can center the
+     full inline link list at desktop widths. Once the toggle replaces
+     that list (<960px), centering leaves the button floating in the
+     middle of the header instead of sitting next to the CTA/at the
+     right edge — flip it here, not just at the 600px breakpoint below,
+     so it's correct for the whole range the toggle is actually shown. */
+  .site-nav {
+    justify-content: flex-end;
+  }
+
   .site-nav__toggle-icon {
     position: relative;
     inline-size: 20px;
@@ -2104,23 +2114,32 @@ select.appointment-form__input {
     /* Compact enough that all eight links fit an ordinary phone screen
        without scrolling; overflow-y stays on purely as a safety net for
        unusual cases (e.g. a user's accessibility text-size setting). */
-    padding: 5rem var(--container-padding) 2rem;
+    padding: calc(5rem + env(safe-area-inset-top)) var(--container-padding) calc(2rem + env(safe-area-inset-bottom));
     background-color: var(--color-porcelain);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     transform: translateX(100%);
-    transition: transform var(--duration-base) var(--ease-in-out);
+    /* When closed, the panel is only pushed off-screen visually — its
+       links stay in the DOM and, without this, remain reachable by
+       keyboard Tab and screen-reader virtual cursors even though
+       nothing is visible. visibility:hidden removes it from both, and
+       the transition delay keeps it visible until the slide-out
+       animation has actually finished instead of vanishing mid-slide. */
+    visibility: hidden;
+    transition: transform var(--duration-base) var(--ease-in-out), visibility 0s var(--duration-base);
   }
 
   .site-nav__menu[data-open="true"] {
     transform: translateX(0);
+    visibility: visible;
+    transition: transform var(--duration-base) var(--ease-in-out), visibility 0s;
   }
 
   /* Belongs to the menu overlay itself — always guaranteed to render on
      top of it, regardless of anything happening elsewhere on the page. */
   .site-nav__menu-close {
     position: absolute;
-    inset-block-start: 1.5rem;
+    inset-block-start: calc(1.5rem + env(safe-area-inset-top));
     inset-inline-end: var(--container-padding);
     inline-size: 44px;
     block-size: 44px;
@@ -2204,12 +2223,8 @@ select.appointment-form__input {
     display: none;
   }
 
-  /* With the nav CTA gone, the hamburger toggle would otherwise center
-     itself in the leftover flex space instead of sitting flush with the
-     right edge where users expect it. */
-  .site-nav {
-    justify-content: flex-end;
-  }
+  /* Hamburger right-alignment is now handled once at the 960px
+     breakpoint above, so nothing extra is needed here. */
 
   .trust-strip__inner {
     flex-direction: column;

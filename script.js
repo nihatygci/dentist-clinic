@@ -202,6 +202,30 @@
     const label = toggle.querySelector('.site-nav__toggle-label');
     let releaseFocusTrap = null;
 
+    let scrollLockY = 0;
+
+    function lockBodyScroll() {
+      // overflow:hidden on <body> alone does not stop background touch
+      // scrolling on iOS Safari behind a position:fixed overlay — the
+      // reliable cross-browser fix is to pin the body itself in place
+      // at the current scroll offset, then restore that offset on close.
+      scrollLockY = window.scrollY || document.documentElement.scrollTop;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollLockY}px`;
+      document.body.style.insetInlineStart = '0';
+      document.body.style.insetInlineEnd = '0';
+      document.body.classList.add('nav-menu-open');
+    }
+
+    function unlockBodyScroll() {
+      document.body.classList.remove('nav-menu-open');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.insetInlineStart = '';
+      document.body.style.insetInlineEnd = '';
+      window.scrollTo(0, scrollLockY);
+    }
+
     function openMenu() {
       menu.setAttribute('data-open', 'true');
       toggle.setAttribute('aria-expanded', 'true');
@@ -213,8 +237,7 @@
       // fix: just hide anything that could visually compete with the
       // full-screen menu while it's open, instead of fighting stacking
       // contexts. They reappear exactly as they were once it closes.
-      document.body.classList.add('nav-menu-open');
-      document.body.style.overflow = 'hidden';
+      lockBodyScroll();
       releaseFocusTrap = trapFocus(menu);
       closeBtn.focus();
     }
@@ -223,8 +246,7 @@
       menu.setAttribute('data-open', 'false');
       toggle.setAttribute('aria-expanded', 'false');
       if (label) label.textContent = 'Menü';
-      document.body.classList.remove('nav-menu-open');
-      document.body.style.overflow = '';
+      unlockBodyScroll();
       if (releaseFocusTrap) {
         releaseFocusTrap();
         releaseFocusTrap = null;
