@@ -185,6 +185,20 @@
     const menu = document.querySelector('[data-nav-menu]');
     if (!toggle || !menu) return;
 
+    // A dedicated close button lives *inside* the menu itself. Being a
+    // child of the menu, it trivially always paints on top of the
+    // menu's own background — closing it never depends on any z-index
+    // reasoning about the original header toggle at all.
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'site-nav__menu-close';
+    closeBtn.setAttribute('aria-label', 'Menüyü kapat');
+    closeBtn.innerHTML =
+      '<svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">' +
+      '<path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>' +
+      '</svg>';
+    menu.insertBefore(closeBtn, menu.firstChild);
+
     const label = toggle.querySelector('.site-nav__toggle-label');
     let releaseFocusTrap = null;
 
@@ -192,16 +206,24 @@
       menu.setAttribute('data-open', 'true');
       toggle.setAttribute('aria-expanded', 'true');
       if (label) label.textContent = 'Kapat';
+      // .site-header is position:fixed, which (per spec, regardless of
+      // z-index) always creates its own stacking context — so the menu,
+      // nested inside it, can never out-rank page-level fixed elements
+      // like the sticky CTA bar purely through z-index. Simplest robust
+      // fix: just hide anything that could visually compete with the
+      // full-screen menu while it's open, instead of fighting stacking
+      // contexts. They reappear exactly as they were once it closes.
+      document.body.classList.add('nav-menu-open');
       document.body.style.overflow = 'hidden';
       releaseFocusTrap = trapFocus(menu);
-      const firstLink = menu.querySelector('.site-nav__link');
-      if (firstLink) firstLink.focus();
+      closeBtn.focus();
     }
 
     function closeMenu({ restoreFocus = true } = {}) {
       menu.setAttribute('data-open', 'false');
       toggle.setAttribute('aria-expanded', 'false');
       if (label) label.textContent = 'Menü';
+      document.body.classList.remove('nav-menu-open');
       document.body.style.overflow = '';
       if (releaseFocusTrap) {
         releaseFocusTrap();
@@ -214,6 +236,8 @@
       const isOpen = toggle.getAttribute('aria-expanded') === 'true';
       isOpen ? closeMenu({ restoreFocus: false }) : openMenu();
     });
+
+    closeBtn.addEventListener('click', () => closeMenu());
 
     menu.addEventListener('click', (e) => {
       if (e.target.closest('.site-nav__link')) {
@@ -747,25 +771,17 @@
 
   /* ========================================================================
      14. GALLERY LIGHTBOX
+     A single shared overlay, reused by two independent triggers:
+       - clinic-space photos: click any photo, cycle through all three.
+       - before/after cards: a dedicated "expand" button opens just that
+         card's own before + after pair. Deliberately NOT wired to clicks
+         on the photos themselves — that would fight with the drag-to-
+         compare gesture on the exact same element, and depends on
+         clip-path pointer-event exclusion behaving perfectly across every
+         browser. A dedicated button has none of those failure modes.
      ==================================================================== */
 
-  function initGalleryLightbox() {
-    const groups = {
-      'smile-gallery': Array.from(
-        document.querySelectorAll(
-          '.before-after-card__image--before, .before-after-card__image--after'
-        )
-      ),
-      'clinic-space': Array.from(document.querySelectorAll('.clinic-space__item img'))
-    };
-
-    const allEntries = [];
-    Object.entries(groups).forEach(([groupName, images]) => {
-      images.forEach((img) => allEntries.push({ groupName, img }));
-    });
-
-    if (!allEntries.length) return;
-
+  function createLightbox() {
     const overlay = document.createElement('div');
     overlay.className = 'js-lightbox';
     overlay.setAttribute('role', 'dialog');
@@ -800,15 +816,40 @@
     overlay.appendChild(figure);
     document.body.appendChild(overlay);
 
-    let activeGroup = [];
+    let activeImages = [];
     let activeIndex = 0;
     let releaseFocusTrap = null;
     let lastFocusedElement = null;
 
-    function openLightbox(groupName, startIndex) {
-      activeGroup = allEntries.filter((entry) => entry.groupName === groupName);
-      activeIndex = activeGroup.findIndex((entry) => entry.img === allEntries[startIndex].img);
-      if (activeIndex < 0) activeIndex = 0;
+    function renderActiveImage() {
+      const img = activeImages[activeIndex];
+      lightboxImage.src = img.currentSrc || img.src;
+      lightboxImage.alt = img.alt || '';
+      const multiImage = activeImages.length > 1;
+      prevBtn.style.display = multiImage ? 'block' : 'none';
+      nextBtn.style.display = multiImage ? 'block' : 'none';
+    }
+
+    function showPrev() {
+      activeIndex = (activeIndex - 1 + activeImages.length) % activeImages.length;
+      renderActiveImage();
+    }
+
+    function showNext() {
+      activeIndex = (activeIndex + 1) % activeImages.length;
+      renderActiveImage();
+    }
+
+    function handleKeydown(e) {
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowLeft') showPrev();
+      if (e.key === 'ArrowRight') showNext();
+    }
+
+    function open(images, startIndex = 0) {
+      if (!images || !images.length) return;
+      activeImages = images;
+      activeIndex = startIndex;
 
       lastFocusedElement = document.activeElement;
       renderActiveImage();
@@ -822,7 +863,7 @@
       document.addEventListener('keydown', handleKeydown);
     }
 
-    function closeLightbox() {
+    function close() {
       overlay.classList.remove('is-open');
       document.body.style.overflow = '';
       document.removeEventListener('keydown', handleKeydown);
@@ -830,57 +871,47 @@
       if (lastFocusedElement) lastFocusedElement.focus();
     }
 
-    function renderActiveImage() {
-      const entry = activeGroup[activeIndex];
-      lightboxImage.src = entry.img.currentSrc || entry.img.src;
-      lightboxImage.alt = entry.img.alt || '';
-      const multiImage = activeGroup.length > 1;
-      prevBtn.style.display = multiImage ? 'block' : 'none';
-      nextBtn.style.display = multiImage ? 'block' : 'none';
-    }
-
-    function showPrev() {
-      activeIndex = (activeIndex - 1 + activeGroup.length) % activeGroup.length;
-      renderActiveImage();
-    }
-
-    function showNext() {
-      activeIndex = (activeIndex + 1) % activeGroup.length;
-      renderActiveImage();
-    }
-
-    function handleKeydown(e) {
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowLeft') showPrev();
-      if (e.key === 'ArrowRight') showNext();
-    }
-
-    closeBtn.addEventListener('click', closeLightbox);
+    closeBtn.addEventListener('click', close);
     prevBtn.addEventListener('click', showPrev);
     nextBtn.addEventListener('click', showNext);
-
     overlay.addEventListener('click', (e) => {
-      if (e.target === overlay) closeLightbox();
+      if (e.target === overlay) close();
     });
 
-    allEntries.forEach((entry, index) => {
-      entry.img.setAttribute('tabindex', '0');
-      entry.img.setAttribute('role', 'button');
-      entry.img.setAttribute('aria-label', `Görseli büyüt: ${entry.img.alt || 'galeri fotoğrafı'}`);
+    return { open };
+  }
 
-      const trigger = (e) => {
-        // Smile-gallery images sit inside a before/after card whose parent
-        // also listens for clicks to reposition the compare handle —
-        // without this, opening the lightbox would also jump the slider.
-        e.stopPropagation();
-        openLightbox(entry.groupName, index);
-      };
-      entry.img.addEventListener('click', trigger);
-      entry.img.addEventListener('keydown', (e) => {
+  function initGalleryLightbox() {
+    const clinicImages = Array.from(document.querySelectorAll('.clinic-space__item img'));
+    const beforeAfterCards = Array.from(document.querySelectorAll('[data-before-after]'));
+
+    if (!clinicImages.length && !beforeAfterCards.length) return;
+
+    const lightbox = createLightbox();
+
+    clinicImages.forEach((img, index) => {
+      img.setAttribute('tabindex', '0');
+      img.setAttribute('role', 'button');
+      img.setAttribute('aria-label', `Görseli büyüt: ${img.alt || 'galeri fotoğrafı'}`);
+
+      const trigger = () => lightbox.open(clinicImages, index);
+      img.addEventListener('click', trigger);
+      img.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          trigger(e);
+          trigger();
         }
+      });
+    });
+
+    beforeAfterCards.forEach((card) => {
+      const expandBtn = card.querySelector('.before-after-card__expand');
+      const beforeImg = card.querySelector('.before-after-card__image--before');
+      const afterImg = card.querySelector('.before-after-card__image--after');
+      if (!expandBtn || !beforeImg || !afterImg) return;
+
+      expandBtn.addEventListener('click', () => {
+        lightbox.open([beforeImg, afterImg], 0);
       });
     });
   }

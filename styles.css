@@ -1,22 +1,41 @@
 /* ==========================================================================
-   AURA DENTAL — Design System & Stylesheet (v4 — mobile menu + gallery fix)
+   AURA DENTAL — Design System & Stylesheet (v5 — mobile menu root-cause fix)
    Editorial / Scandinavian / Luxury Healthcare
+
+   Changelog vs. v4:
+   - Root-caused the mobile menu stacking problem properly this time:
+     .site-header uses position:fixed, which — per spec, regardless of
+     its z-index value — ALWAYS opens its own stacking context. That
+     means the menu nested inside it can never reliably out-rank other
+     page-level fixed elements (the sticky CTA bar, back-to-top) through
+     z-index alone, no matter what number is used. Rather than fight
+     that (or relocate the menu's DOM node, which was tried and reverted
+     — it broke the desktop inline nav layout, since the menu's DOM
+     position is what makes it render inline in the header at desktop
+     widths), the fix is simpler and bulletproof: those two elements are
+     just hidden outright while the menu is open (body.nav-menu-open),
+     so there's nothing left to visually conflict with.
+   - The menu now carries its own dedicated close button as part of its
+     own content — always trivially on top of the menu (it's a child of
+     it), so closing it never depends on any z-index reasoning about the
+     original header toggle at all.
+   - Mobile menu sizing tightened further (compact link size + spacing)
+     so all 8 links fit an ordinary phone screen without scrolling.
+   - Before/after cards: added an explicit, always-visible "expand"
+     button rather than relying on clicking the photos themselves —
+     that depended on clip-path correctly excluding the clipped photo
+     region from hit-testing, and fought with the drag-to-compare
+     gesture on the same element. The dedicated button has neither
+     problem and works identically for both the before and after photo.
 
    Changelog vs. v3:
    - The mobile menu's link size/spacing was still oversized enough to
      need internal scrolling on ordinary phones (a leftover from v3's
      fix, which solved the "content clipped off-screen" problem but
-     overcorrected on top padding). Links and gaps are now genuinely
-     compact — all 8 fit without scrolling on real phone viewports —
-     with overflow-y kept only as a safety net, not the expected path.
+     overcorrected on top padding).
    - The before/after gallery's lightbox only ever looked at the "after"
-     photos — the "before" photos couldn't be opened larger at all.
-     Both are wired up now, in natural before → after → before... order.
-   - Removed the now-unreachable "click the photo to jump the compare
-     handle there" behavior: since both photos together always cover
-     100% of the card and both now open the lightbox on click, that
-     handler could never fire anymore. Dragging the handle remains the
-     one, unambiguous way to compare — click always means "view larger".
+     photos — the "before" photos couldn't be opened larger at all
+     (superseded by the dedicated expand button above).
 
    Changelog vs. v2 (mobile-specific fixes — found by re-reading every
    file end to end, not just spot-checking):
@@ -1121,7 +1140,6 @@ section {
   border-radius: var(--radius-signature);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  cursor: zoom-in;
   transition: box-shadow var(--duration-base) var(--ease-out);
 }
 
@@ -1189,6 +1207,31 @@ section {
 
 .before-after-card__slider:focus-visible::after {
   box-shadow: var(--shadow-focus);
+}
+
+/* Explicit, always-visible "view larger" affordance — deliberately a
+   dedicated button rather than making the photos themselves clickable,
+   so it never competes with the drag-to-compare gesture and works
+   identically (and unambiguously) on both before and after. */
+.before-after-card__expand {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: var(--space-sm);
+  inset-inline-end: var(--space-sm);
+  inline-size: 36px;
+  block-size: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  color: var(--color-porcelain);
+  background-color: hsl(208deg 15% 8% / 0.55);
+  transition: background-color var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+}
+
+.before-after-card__expand:hover,
+.before-after-card__expand:focus-visible {
+  background-color: hsl(208deg 15% 8% / 0.8);
+  transform: scale(1.06);
 }
 
 .before-after-card__caption {
@@ -1972,14 +2015,11 @@ select.appointment-form__input {
 /* ---- Tablet ---- */
 @media (max-width: 960px) {
 
-  /* Must render above the full-screen menu (z-index: var(--z-overlay))
-     once it's open — otherwise the menu overlay paints over this
-     (non-positioned) button and the close tap has nothing to hit. Also
-     padded out to a proper ~44px touch target; the icon+label alone are
-     noticeably smaller than that. */
+  /* Padded out to a proper ~44px touch target — the icon+label alone
+     are noticeably smaller than that. (The menu now carries its own
+     dedicated close button, so this toggle no longer needs any special
+     z-index handling to stay reachable once the menu is open.) */
   .site-nav__toggle {
-    position: relative;
-    z-index: calc(var(--z-overlay) + 1);
     display: inline-flex;
     align-items: center;
     gap: var(--space-2xs);
@@ -2017,6 +2057,14 @@ select.appointment-form__input {
     transform: rotate(-45deg);
   }
 
+  /* .site-header is position:fixed, which always opens its own stacking
+     context — so this menu, nested inside it, can never reliably
+     out-rank page-level fixed elements (the sticky CTA bar, back-to-top)
+     through z-index alone. Rather than fight that, script.js simply
+     hides those elements while the menu is open (body.nav-menu-open —
+     see the .js-back-to-top / .js-mobile-cta rules). The menu itself
+     just needs a z-index high enough to clear the header's own content
+     and any normal page content, which var(--z-overlay) comfortably is. */
   .site-nav__menu {
     position: fixed;
     inset: 0;
@@ -2026,14 +2074,10 @@ select.appointment-form__input {
     justify-content: flex-start;
     align-items: flex-start;
     gap: clamp(0.5rem, 0.4rem + 1vw, 1rem);
-    /* A fixed, modest top offset — just enough to clear the header/close
-       button — rather than stacking on top of the already-fluid
-       container padding. Combined with the compact link sizing below,
-       all eight links comfortably fit on ordinary phone screens without
-       scrolling. overflow-y stays on purely as a safety net for unusual
-       cases (e.g. a user's accessibility text-size setting), never as
-       the expected behavior. */
-    padding: 4rem var(--container-padding) 2rem;
+    /* Compact enough that all eight links fit an ordinary phone screen
+       without scrolling; overflow-y stays on purely as a safety net for
+       unusual cases (e.g. a user's accessibility text-size setting). */
+    padding: 5rem var(--container-padding) 2rem;
     background-color: var(--color-porcelain);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -2043,6 +2087,27 @@ select.appointment-form__input {
 
   .site-nav__menu[data-open="true"] {
     transform: translateX(0);
+  }
+
+  /* Belongs to the menu overlay itself — always guaranteed to render on
+     top of it, regardless of anything happening elsewhere on the page. */
+  .site-nav__menu-close {
+    position: absolute;
+    inset-block-start: 1.5rem;
+    inset-inline-end: var(--container-padding);
+    inline-size: 44px;
+    block-size: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-full);
+    color: var(--color-text);
+    transition: background-color var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+  }
+
+  .site-nav__menu-close:hover,
+  .site-nav__menu-close:focus-visible {
+    background-color: var(--color-sand);
+    transform: rotate(90deg);
   }
 
   .site-nav__link {
@@ -2225,6 +2290,18 @@ select.appointment-form__input {
 
 .js-back-to-top:hover {
   transform: translateY(-3px);
+}
+
+/* .site-header is position:fixed, which always opens its own stacking
+   context (independent of z-index) — so the full-screen mobile menu
+   nested inside it can never reliably out-rank these page-level fixed
+   elements through z-index alone. Simplest robust fix: hide them while
+   the menu is open. They return to their normal visibility logic the
+   moment it closes. */
+body.nav-menu-open .js-back-to-top,
+body.nav-menu-open .js-mobile-cta {
+  visibility: hidden;
+  opacity: 0;
 }
 
 /* On mobile the sticky CTA bar occupies the bottom strip of the screen —
