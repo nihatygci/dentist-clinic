@@ -225,11 +225,16 @@ html {
   color-scheme: light;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* Belt-and-braces guard against any single element (a long word, a
+     fluid heading at an in-between viewport, etc.) pushing the page
+     wider than the viewport and creating horizontal scroll on mobile. */
+  overflow-x: hidden;
 }
 
 body {
   min-block-size: 100vh;
   min-block-size: 100dvh;
+  overflow-x: hidden;
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: var(--leading-body);
@@ -1717,6 +1722,28 @@ section {
   display: grid;
   gap: var(--space-2xs);
   position: relative;
+}
+
+.appointment-form__row-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+@media (min-width: 520px) {
+  .appointment-form__row-group {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Native date inputs render their own affordance icon; align it with the
+   rest of the underline-style fields instead of the browser's default box. */
+.appointment-form__input[type="date"] {
+  color-scheme: light;
+}
+
+.appointment-form__input[type="date"]:invalid {
+  color: var(--color-text-muted);
 }
 
 .appointment-form__label {

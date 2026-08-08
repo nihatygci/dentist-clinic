@@ -435,11 +435,14 @@
       const originalText = el.textContent.trim();
       const suffixMatch = originalText.match(/[^\d,.\s]+$/);
       const suffix = suffixMatch ? suffixMatch[0] : '';
-      const usesThousandsSeparator = /\d,\d/.test(originalText);
+      // Turkish number formatting uses "." as the thousands separator
+      // (e.g. "8.400"), not ",", so detect either — and always render
+      // with the tr-TR locale rather than en-US.
+      const usesThousandsSeparator = /\d[.,]\d/.test(originalText);
 
       if (reduceMotion) {
         el.textContent =
-          (usesThousandsSeparator ? target.toLocaleString('en-US') : String(target)) + suffix;
+          (usesThousandsSeparator ? target.toLocaleString('tr-TR') : String(target)) + suffix;
         return;
       }
 
@@ -454,7 +457,7 @@
         const currentValue = Math.round(target * eased);
 
         el.textContent =
-          (usesThousandsSeparator ? currentValue.toLocaleString('en-US') : String(currentValue)) +
+          (usesThousandsSeparator ? currentValue.toLocaleString('tr-TR') : String(currentValue)) +
           suffix;
 
         if (progress < 1) {
@@ -1031,12 +1034,30 @@
     const form = document.getElementById('contact');
     if (!form || form.tagName !== 'FORM') return;
 
+    const dateField = form.elements.namedItem('preferred-date');
+    if (dateField) {
+      // Clinic is open Monday–Saturday only (see hours in the contact
+      // info), so don't let the picker offer past dates or Sundays.
+      const today = new Date();
+      dateField.min = today.toISOString().slice(0, 10);
+    }
+
     const validators = {
       'full-name': (value) => value.trim().length >= 2 || 'Lütfen adınızı ve soyadınızı girin.',
       email: (value) =>
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) || 'Lütfen geçerli bir e-posta adresi girin.',
       phone: (value) =>
-        /^[+\d][\d\s()-]{6,}$/.test(value.trim()) || 'Lütfen geçerli bir telefon numarası girin.'
+        /^[+\d][\d\s()-]{6,}$/.test(value.trim()) || 'Lütfen geçerli bir telefon numarası girin.',
+      'preferred-date': (value) => {
+        if (!value) return 'Lütfen tercih ettiğiniz bir tarih seçin.';
+        const selected = new Date(value + 'T00:00:00');
+        const todayMidnight = new Date();
+        todayMidnight.setHours(0, 0, 0, 0);
+        if (selected < todayMidnight) return 'Lütfen bugün veya sonrası için bir tarih seçin.';
+        if (selected.getDay() === 0) return 'Kliniğimiz pazar günleri kapalıdır, lütfen başka bir gün seçin.';
+        return true;
+      },
+      'preferred-time': (value) => value.trim().length > 0 || 'Lütfen tercih ettiğiniz bir saat aralığı seçin.'
     };
 
     function getOrCreateErrorEl(field) {

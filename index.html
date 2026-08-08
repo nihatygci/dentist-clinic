@@ -12,6 +12,7 @@
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Aura Dental">
   <meta property="og:title" content="Aura Dental — Konfor ve Ustalık Odaklı Yeniden Tasarlanmış Diş Hekimliği">
   <meta property="og:description" content="Konfor, hassasiyet ve ileri teknoloji üzerine kurulu bir klinikte premium gülüş tasarımı, veneer, implant ve ortodonti.">
   <meta property="og:image" content="https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=1200&h=630&fit=crop&auto=format">
@@ -57,9 +58,21 @@
       "addressLocality": "İzmir",
       "addressCountry": "TR"
     },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 38.4237,
+      "longitude": 27.1428
+    },
     "telephone": "+90-232-000-00-00",
+    "email": "hello@auradental.com",
     "url": "https://www.auradental.com",
-    "priceRange": "$$$"
+    "priceRange": "$$$",
+    "openingHoursSpecification": {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      "opens": "09:00",
+      "closes": "19:00"
+    }
   }
   </script>
 
@@ -223,16 +236,16 @@
             <span class="trust-strip__label">Yıllık Deneyim</span>
           </li>
           <li class="trust-strip__stat">
-            <span class="trust-strip__number" data-count-to="8400">8.400+</span>
-            <span class="trust-strip__label">Tedavi Edilen Gülüş</span>
-          </li>
-          <li class="trust-strip__stat">
             <span class="trust-strip__number" data-count-to="6">6</span>
             <span class="trust-strip__label">Uzman Diş Hekimi</span>
           </li>
           <li class="trust-strip__stat">
-            <span class="trust-strip__number" data-count-to="98">98%</span>
-            <span class="trust-strip__label">Hasta Memnuniyeti</span>
+            <span class="trust-strip__number">Ücretsiz</span>
+            <span class="trust-strip__label">İlk Görüşme</span>
+          </li>
+          <li class="trust-strip__stat">
+            <span class="trust-strip__number">Aynı Hafta</span>
+            <span class="trust-strip__label">Randevu İmkanı</span>
           </li>
         </ul>
       </div>
@@ -898,6 +911,23 @@
               <option value="whitening">Profesyonel Diş Beyazlatma</option>
               <option value="general-care">Genel &amp; Koruyucu Bakım</option>
             </select>
+          </div>
+
+          <div class="appointment-form__row-group">
+            <div class="appointment-form__row">
+              <label class="appointment-form__label" for="preferred-date">Tercih Edilen Tarih</label>
+              <input class="appointment-form__input" type="date" id="preferred-date" name="preferred-date" autocomplete="off" required>
+            </div>
+
+            <div class="appointment-form__row">
+              <label class="appointment-form__label" for="preferred-time">Tercih Edilen Saat</label>
+              <select class="appointment-form__input" id="preferred-time" name="preferred-time" required>
+                <option value="">Bir saat aralığı seçin</option>
+                <option value="morning">09:00 – 12:00</option>
+                <option value="afternoon">12:00 – 15:00</option>
+                <option value="evening">15:00 – 19:00</option>
+              </select>
+            </div>
           </div>
 
           <div class="appointment-form__row">
