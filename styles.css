@@ -543,6 +543,15 @@ p {
   display: none;
 }
 
+/* Created and inserted by JS unconditionally (so it exists before any
+   breakpoint check runs) — it must default to hidden here, otherwise it
+   renders as a plain unstyled button and shows up inline in the desktop
+   nav bar, ahead of "Ana Sayfa". Only the <960px rule below (which sets
+   its real position/appearance) turns it back on. */
+.site-nav__menu-close {
+  display: none;
+}
+
 .site-nav__menu {
   display: flex;
   align-items: center;
@@ -1653,10 +1662,54 @@ section {
    ========================================================================== */
 
 .appointment__inner {
-  display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: var(--space-2xl);
   margin-block-end: var(--space-xl);
+}
+
+/* ---- Unified card: dark info panel + light form side by side ---- */
+
+.appointment__card {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  border-radius: var(--radius-signature);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  margin-block-end: var(--space-xl);
+}
+
+.appointment__panel {
+  position: relative;
+  background:
+    radial-gradient(120% 100% at 100% 0%, hsl(190deg 45% 30% / 0.55), transparent 60%),
+    linear-gradient(165deg, var(--color-emerald) 0%, var(--color-emerald-deep) 100%);
+  color: var(--color-porcelain);
+  padding: var(--space-xl) var(--space-lg);
+  display: flex;
+}
+
+/* A faint tooth-curve motif, echoing the treatment-card icon strokes,
+   anchored bottom-right — decorative only, never competes with text
+   contrast since it sits behind everything at low opacity. */
+.appointment__panel::before {
+  content: "";
+  position: absolute;
+  inset-block-end: -10%;
+  inset-inline-end: -12%;
+  inline-size: 60%;
+  aspect-ratio: 1;
+  border: 1px solid hsl(190deg 60% 80% / 0.14);
+  border-radius: var(--radius-signature);
+  transform: rotate(18deg);
+  pointer-events: none;
+}
+
+.appointment__panel-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.appointment__panel .eyebrow {
+  color: var(--color-mint);
 }
 
 .appointment__heading {
@@ -1670,52 +1723,75 @@ section {
 
 .appointment__body {
   font-size: var(--text-md);
-  color: var(--color-text-muted);
+  color: hsl(190deg 25% 88% / 0.82);
   line-height: var(--leading-loose);
-  max-inline-size: 40ch;
+  max-inline-size: 36ch;
   margin-block-end: var(--space-lg);
 }
 
 .appointment__contact-info {
   font-style: normal;
-  display: grid;
-  gap: var(--space-sm);
+  margin-block-start: auto;
   padding-block-start: var(--space-lg);
-  border-block-start: 1px solid var(--color-border);
+  border-block-start: 1px solid hsl(190deg 40% 80% / 0.18);
 }
 
-.appointment__contact-line {
+.appointment__contact-list {
   display: grid;
-  grid-template-columns: max-content 1fr;
   gap: var(--space-sm);
+}
+
+.appointment__contact-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--space-xs);
+}
+
+.appointment__contact-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border-radius: var(--radius-full);
+  background-color: hsl(190deg 40% 90% / 0.1);
+  color: var(--color-mint);
+}
+
+.appointment__contact-text {
+  display: grid;
   font-size: var(--text-sm);
+  line-height: var(--leading-snug);
+  padding-block-start: 0.4rem;
 }
 
 .appointment__contact-label {
-  color: var(--color-text-muted);
+  color: hsl(190deg 25% 80% / 0.7);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
   font-size: var(--text-xs);
+  margin-block-end: var(--space-3xs);
 }
 
-.appointment__contact-line a {
-  border-block-end: 1px solid transparent;
+.appointment__contact-text a {
+  color: inherit;
+  border-block-end: 1px solid hsl(190deg 40% 80% / 0.35);
   transition: border-color var(--duration-fast) var(--ease-out);
 }
 
-.appointment__contact-line a:hover {
-  border-color: var(--color-ink);
+.appointment__contact-text a:hover,
+.appointment__contact-text a:focus-visible {
+  border-color: var(--color-mint);
 }
 
 /* ---- Form ---- */
 
 .appointment-form {
   display: grid;
+  align-content: start;
   gap: var(--space-md);
-  padding: var(--space-lg);
+  padding: var(--space-xl) var(--space-lg);
   background-color: var(--color-white);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
 }
 
 .appointment-form__row {
@@ -1758,24 +1834,25 @@ section {
   appearance: none;
   inline-size: 100%;
   padding-block: var(--space-xs);
-  padding-inline: 0;
-  background: transparent;
-  border: none;
-  border-block-end: 1px solid var(--color-border);
-  border-radius: 0;
+  padding-inline: var(--space-sm);
+  background-color: var(--color-sand);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
   font-size: var(--text-base);
+  font-family: inherit;
   color: var(--color-text);
-  transition: border-color var(--duration-fast) var(--ease-out);
+  transition: border-color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
 }
 
 .appointment-form__input:hover {
-  border-color: var(--color-stone);
+  background-color: var(--color-ash);
 }
 
 .appointment-form__input:focus-visible {
   outline: none;
+  background-color: var(--color-white);
   border-color: var(--color-accent-strong);
-  box-shadow: none;
+  box-shadow: var(--shadow-focus);
 }
 
 .appointment-form__input[aria-invalid="true"] {
@@ -1784,13 +1861,13 @@ section {
 
 .appointment-form__input--textarea {
   resize: vertical;
-  min-block-size: 6rem;
+  min-block-size: 5.5rem;
 }
 
 select.appointment-form__input {
   background-image: linear-gradient(45deg, transparent 50%, var(--color-stone) 50%),
                      linear-gradient(135deg, var(--color-stone) 50%, transparent 50%);
-  background-position: calc(100% - 6px) center, calc(100% - 1px) center;
+  background-position: calc(100% - 20px) center, calc(100% - 14px) center;
   background-size: 6px 6px, 6px 6px;
   background-repeat: no-repeat;
 }
@@ -1824,8 +1901,8 @@ select.appointment-form__input {
 
 .appointment__map {
   inline-size: 100%;
-  block-size: clamp(320px, 40vw, 520px);
-  border-radius: var(--radius-md);
+  block-size: clamp(280px, 32vw, 420px);
+  border-radius: var(--radius-signature);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   margin-inline: auto;
@@ -2034,8 +2111,12 @@ select.appointment-form__input {
     aspect-ratio: 16 / 9;
   }
 
-  .appointment__inner {
+  .appointment__card {
     grid-template-columns: 1fr;
+  }
+
+  .appointment__panel::before {
+    display: none;
   }
 }
 
@@ -2104,7 +2185,17 @@ select.appointment-form__input {
      and any normal page content, which var(--z-overlay) comfortably is. */
   .site-nav__menu {
     position: fixed;
-    inset: 0;
+    inset-block-start: 0;
+    inset-inline: 0;
+    /* inset:0 alone sizes this against whichever viewport the browser
+       happens to be using at layout time. On mobile, the address bar
+       showing/hiding changes that after the menu is already open (e.g.
+       triggered by scrolling its own link list), which can leave the
+       fixed box shorter than the now-larger visible area — a gap at
+       the bottom of the menu with real page content showing through.
+       100dvh tracks the actual visible viewport continuously instead. */
+    block-size: 100vh;
+    block-size: 100dvh;
     z-index: var(--z-overlay);
     display: flex;
     flex-direction: column;
@@ -2244,6 +2335,11 @@ select.appointment-form__input {
 
   .testimonial-card::before {
     inset-inline-start: var(--space-sm);
+  }
+
+  .appointment__panel,
+  .appointment-form {
+    padding-inline: var(--space-sm);
   }
 
   .clinic-space__gallery {

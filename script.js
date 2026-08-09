@@ -304,13 +304,23 @@
       e.preventDefault();
 
       const headerOffset = header ? header.offsetHeight : 0;
-      const targetPosition =
-        target.getBoundingClientRect().top + window.scrollY - headerOffset - 16;
-
-      window.scrollTo({
-        top: targetPosition,
-        behavior: reduceMotion ? 'auto' : 'smooth'
-      });
+      // Sections use content-visibility:auto for render performance —
+      // while a section is off-screen, the browser substitutes a
+      // placeholder height for it (contain-intrinsic-size) instead of
+      // its true rendered height. A manual scrollY calculation here
+      // (getBoundingClientRect().top + window.scrollY) would use that
+      // placeholder for every section between here and the target, so
+      // for anything taller than the placeholder the math lands short —
+      // then, as those sections actually render on the way down, the
+      // page grows underneath the scroll and the final resting spot
+      // ends up past the intended heading. Element.scrollIntoView() is
+      // specified to un-skip content-visibility:auto ancestors of its
+      // target before computing where to stop, so it always lands
+      // correctly; scroll-margin-top (set here per click, since header
+      // height itself varies with scroll state) reserves room for the
+      // fixed header without any manual offset math.
+      target.style.scrollMarginTop = `${headerOffset + 16}px`;
+      target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
 
       if (!target.hasAttribute('tabindex')) {
         target.setAttribute('tabindex', '-1');

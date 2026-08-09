@@ -168,7 +168,7 @@
           <li class="site-nav__item"><a class="site-nav__link" href="#doctors">Doktorlar</a></li>
           <li class="site-nav__item"><a class="site-nav__link" href="#testimonials">Yorumlar</a></li>
           <li class="site-nav__item"><a class="site-nav__link" href="#faq">SSS</a></li>
-          <li class="site-nav__item"><a class="site-nav__link" href="#contact">İletişim</a></li>
+          <li class="site-nav__item"><a class="site-nav__link" href="#appointment">İletişim</a></li>
         </ul>
       </nav>
 
@@ -757,7 +757,7 @@
           sağlayıcılarıyla çalışıyor ve esnek ödeme seçeneklerini
           randevu sırasında — sonrasında değil — açıkça konuşuyoruz.
         </p>
-        <a class="text-link" href="#contact">
+        <a class="text-link" href="#appointment">
           Ödeme seçenekleri hakkında bilgi alın <span aria-hidden="true">→</span>
         </a>
       </div>
@@ -854,107 +854,146 @@
     <section class="appointment" id="appointment" aria-labelledby="appointment-heading" data-animate="appointment">
       <div class="appointment__inner container">
 
-        <div class="appointment__intro">
-          <p class="eyebrow">Randevu Al</p>
-          <h2 class="appointment__heading" id="appointment-heading">
-            Bir taahhütle değil, bir konuşmayla başlayın.
-          </h2>
-          <p class="appointment__body">
-            Ne aradığınızı kısaca bize anlatın; ücretsiz randevunuzu
-            planlamak için bir iş günü içinde size dönüş yapalım.
-          </p>
+        <div class="appointment__card">
+          <div class="appointment__panel">
+            <div class="appointment__panel-content">
+              <p class="eyebrow">Randevu Al</p>
+              <h2 class="appointment__heading" id="appointment-heading">
+                Bir taahhütle değil, bir konuşmayla başlayın.
+              </h2>
+              <p class="appointment__body">
+                Ne aradığınızı kısaca bize anlatın; ücretsiz randevunuzu
+                planlamak için bir iş günü içinde size dönüş yapalım.
+              </p>
 
-          <address class="appointment__contact-info">
-            <p class="appointment__contact-line">
-              <span class="appointment__contact-label">Adres</span>
-              Cumhuriyet Bulvarı No:142, Alsancak, İzmir
-            </p>
-            <p class="appointment__contact-line">
-              <span class="appointment__contact-label">Telefon</span>
-              <a href="tel:+902320000000">+90 232 000 00 00</a>
-            </p>
-            <p class="appointment__contact-line">
-              <span class="appointment__contact-label">E-posta</span>
-              <a href="mailto:hello@auradental.com">hello@auradental.com</a>
-            </p>
-            <p class="appointment__contact-line">
-              <span class="appointment__contact-label">Çalışma Saatleri</span>
-              Pazartesi – Cumartesi, 09:00 – 19:00
-            </p>
-          </address>
-        </div>
-
-        <form class="appointment-form" id="contact" aria-labelledby="appointment-heading" novalidate>
-          <div class="appointment-form__row">
-            <label class="appointment-form__label" for="full-name">Ad Soyad</label>
-            <input class="appointment-form__input" type="text" id="full-name" name="full-name" autocomplete="name" required>
+              <address class="appointment__contact-info">
+                <ul class="appointment__contact-list">
+                  <li class="appointment__contact-item">
+                    <span class="appointment__contact-icon" aria-hidden="true">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 21s7-7.58 7-12a7 7 0 1 0-14 0c0 4.42 7 12 7 12Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                        <circle cx="12" cy="9" r="2.3" stroke="currentColor" stroke-width="1.6"/>
+                      </svg>
+                    </span>
+                    <span class="appointment__contact-text">
+                      <span class="appointment__contact-label">Adres</span>
+                      Cumhuriyet Bulvarı No:142, Alsancak, İzmir
+                    </span>
+                  </li>
+                  <li class="appointment__contact-item">
+                    <span class="appointment__contact-icon" aria-hidden="true">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M6.5 3h3l1.5 4-2 1.5a12 12 0 0 0 6.5 6.5l1.5-2 4 1.5v3a2 2 0 0 1-2.2 2A17 17 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                    <span class="appointment__contact-text">
+                      <span class="appointment__contact-label">Telefon</span>
+                      <a href="tel:+902320000000">+90 232 000 00 00</a>
+                    </span>
+                  </li>
+                  <li class="appointment__contact-item">
+                    <span class="appointment__contact-icon" aria-hidden="true">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M4.5 7 12 13l7.5-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                    <span class="appointment__contact-text">
+                      <span class="appointment__contact-label">E-posta</span>
+                      <a href="mailto:hello@auradental.com">hello@auradental.com</a>
+                    </span>
+                  </li>
+                  <li class="appointment__contact-item">
+                    <span class="appointment__contact-icon" aria-hidden="true">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.6"/>
+                        <path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
+                    <span class="appointment__contact-text">
+                      <span class="appointment__contact-label">Çalışma Saatleri</span>
+                      Pazartesi – Cumartesi, 09:00 – 19:00
+                    </span>
+                  </li>
+                </ul>
+              </address>
+            </div>
           </div>
 
-          <div class="appointment-form__row">
-            <label class="appointment-form__label" for="email">E-posta Adresi</label>
-            <input class="appointment-form__input" type="email" id="email" name="email" autocomplete="email" required>
-          </div>
-
-          <div class="appointment-form__row">
-            <label class="appointment-form__label" for="phone">Telefon Numarası</label>
-            <input class="appointment-form__input" type="tel" id="phone" name="phone" autocomplete="tel" required>
-          </div>
-
-          <div class="appointment-form__row">
-            <label class="appointment-form__label" for="treatment-interest">İlgilendiğiniz Tedavi</label>
-            <select class="appointment-form__input" id="treatment-interest" name="treatment-interest">
-              <option value="">Bir tedavi seçin</option>
-              <option value="smile-design">Gülüş Tasarımı</option>
-              <option value="veneers">Porselen Veneer</option>
-              <option value="implants">Diş İmplantı</option>
-              <option value="orthodontics">Ortodonti</option>
-              <option value="whitening">Profesyonel Diş Beyazlatma</option>
-              <option value="general-care">Genel &amp; Koruyucu Bakım</option>
-            </select>
-          </div>
-
-          <div class="appointment-form__row-group">
+          <form class="appointment-form" id="contact" aria-labelledby="appointment-heading" novalidate>
             <div class="appointment-form__row">
-              <label class="appointment-form__label" for="preferred-date">Tercih Edilen Tarih</label>
-              <input class="appointment-form__input" type="date" id="preferred-date" name="preferred-date" autocomplete="off" required>
+              <label class="appointment-form__label" for="full-name">Ad Soyad</label>
+              <input class="appointment-form__input" type="text" id="full-name" name="full-name" autocomplete="name" required>
+            </div>
+
+            <div class="appointment-form__row-group">
+              <div class="appointment-form__row">
+                <label class="appointment-form__label" for="email">E-posta Adresi</label>
+                <input class="appointment-form__input" type="email" id="email" name="email" autocomplete="email" required>
+              </div>
+
+              <div class="appointment-form__row">
+                <label class="appointment-form__label" for="phone">Telefon Numarası</label>
+                <input class="appointment-form__input" type="tel" id="phone" name="phone" autocomplete="tel" required>
+              </div>
             </div>
 
             <div class="appointment-form__row">
-              <label class="appointment-form__label" for="preferred-time">Tercih Edilen Saat</label>
-              <select class="appointment-form__input" id="preferred-time" name="preferred-time" required>
-                <option value="">Bir saat aralığı seçin</option>
-                <option value="morning">09:00 – 12:00</option>
-                <option value="afternoon">12:00 – 15:00</option>
-                <option value="evening">15:00 – 19:00</option>
+              <label class="appointment-form__label" for="treatment-interest">İlgilendiğiniz Tedavi</label>
+              <select class="appointment-form__input" id="treatment-interest" name="treatment-interest">
+                <option value="">Bir tedavi seçin</option>
+                <option value="smile-design">Gülüş Tasarımı</option>
+                <option value="veneers">Porselen Veneer</option>
+                <option value="implants">Diş İmplantı</option>
+                <option value="orthodontics">Ortodonti</option>
+                <option value="whitening">Profesyonel Diş Beyazlatma</option>
+                <option value="general-care">Genel &amp; Koruyucu Bakım</option>
               </select>
             </div>
-          </div>
 
-          <div class="appointment-form__row">
-            <label class="appointment-form__label" for="message">Mesaj (opsiyonel)</label>
-            <textarea class="appointment-form__input appointment-form__input--textarea" id="message" name="message" rows="4"></textarea>
-          </div>
+            <div class="appointment-form__row-group">
+              <div class="appointment-form__row">
+                <label class="appointment-form__label" for="preferred-date">Tercih Edilen Tarih</label>
+                <input class="appointment-form__input" type="date" id="preferred-date" name="preferred-date" autocomplete="off" required>
+              </div>
 
-          <button class="btn btn--primary btn--large appointment-form__submit" type="submit">
-            Randevu Talep Et
-          </button>
+              <div class="appointment-form__row">
+                <label class="appointment-form__label" for="preferred-time">Tercih Edilen Saat</label>
+                <select class="appointment-form__input" id="preferred-time" name="preferred-time" required>
+                  <option value="">Bir saat aralığı seçin</option>
+                  <option value="morning">09:00 – 12:00</option>
+                  <option value="afternoon">12:00 – 15:00</option>
+                  <option value="evening">15:00 – 19:00</option>
+                </select>
+              </div>
+            </div>
 
-          <p class="appointment-form__note">
-            Herhangi bir taahhüt gerektirmez. Ekibimiz bir iş günü içinde
-            size uygun zamanı teyit edecek.
-          </p>
-        </form>
+            <div class="appointment-form__row">
+              <label class="appointment-form__label" for="message">Mesaj (opsiyonel)</label>
+              <textarea class="appointment-form__input appointment-form__input--textarea" id="message" name="message" rows="3"></textarea>
+            </div>
 
-      </div>
+            <button class="btn btn--primary btn--large appointment-form__submit" type="submit">
+              Randevu Talep Et
+            </button>
 
-      <div class="appointment__map" aria-label="Aura Dental klinik konumunu gösteren harita">
-        <iframe
-          class="appointment__map-frame"
-          title="Aura Dental konum haritası"
-          src="about:blank"
-          data-map-src="https://www.google.com/maps?q=38.4237,27.1428&hl=tr&z=15&output=embed"
-          loading="lazy"
-        ></iframe>
+            <p class="appointment-form__note">
+              Herhangi bir taahhüt gerektirmez. Ekibimiz bir iş günü içinde
+              size uygun zamanı teyit edecek.
+            </p>
+          </form>
+        </div>
+
+        <div class="appointment__map" aria-label="Aura Dental klinik konumunu gösteren harita">
+          <iframe
+            class="appointment__map-frame"
+            title="Aura Dental konum haritası"
+            src="about:blank"
+            data-map-src="https://www.google.com/maps?q=38.4237,27.1428&hl=tr&z=15&output=embed"
+            loading="lazy"
+          ></iframe>
+        </div>
+
       </div>
     </section>
 
